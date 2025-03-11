@@ -1,0 +1,28 @@
+{
+  "displayFieldName" : "",
+  "hasZ" : true,
+  "fieldAliases" : {
+    "OBJECTID" : "OBJECTID",
+    "Shape_Length" : "Shape_Length"
+  },
+  "geometryType" : "esriGeometryPolyline",
+  "spatialReference" : {
+    "wkid" : 4326,
+    "latestWkid" : 4326,
+    "vcsWkid" : 105700,
+    "latestVcsWkid" : 105700
+  },
+  "fields" : [
+    {
+      "name" : "OBJECTID",
+      "type" : "esriFieldTypeOID",
+      "alias" : "OBJECTID"
+    },
+    {
+      "name" : "Shape_Length",
+      "type" : "esriFieldTypeDouble",
+      "alias" : "Shape_Length"
+    }
+  ],
+  "features" : [{"attributes":{"OBJECTID":1,"Shape_Length":0.018968369223105717},"geometry":{"hasZ":true,"paths":[[[118.27152087500008,35.114219095000067,0],[118.27600953400008,35.116131001000042,58.286999999996624],[118.27644882900006,35.116885609000065,58.87159999999858],[118.27798988300003,35.117898860000082,69.056500000006054],[118.27848794400006,35.118989928000076,10],[118.27649155500001,35.11988401800005,58.354099999996834],[118.27620047000005,35.120792354000059,58.00800000000163],[118.26930544900006,35.122170193000045,-0.00010000000474974513]]]}}]
+}

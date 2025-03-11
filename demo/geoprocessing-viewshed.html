@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>
+    Geoprocessing - viewshed analysis | Sample | ArcGIS Maps SDK for
+    JavaScript 4.26
+  </title>
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    #paneDiv {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      padding: 12px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      width: 200px;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.26/"></script>
+
+  <script>
+    require([
+      "esri/config",
+      "esri/WebScene",
+      "esri/views/SceneView",
+      "esri/geometry/Point",
+      "esri/rest/geoprocessor",
+      "esri/rest/support/LinearUnit",
+      "esri/rest/support/FeatureSet"
+    ], (
+      esriConfig,
+      WebScene,
+      SceneView,
+      Point,
+      geoprocessor,
+      LinearUnit,
+      FeatureSet
+    ) => {
+      //设定空间数据门户
+      esriConfig.portalUrl = "https://lyupc.org.cn/arcgis";
+      const gpUrl =
+        "https://gis.sddkqy.cn/server/rest/services/JSONToFeatures/GPServer/JSON%20%E8%BD%AC%E8%A6%81%E7%B4%A0";
+
+      //创建场景对象
+      const LinyiScene = new WebScene({
+        basemap: "dark-gray-vector",
+        ground: "world-elevation"
+      });
+
+      //创建场景视图
+      const view = new SceneView({
+        container: viewDiv,
+        map: LinyiScene,
+        camera: {
+          position: [118.32, 35.08, 30110],
+          tilt: 0,
+          heading: 0
+        },
+        qualityProfile: "high",
+        highlightOptions: {
+          haloOpacity: 0
+        },
+        popup: {
+          dockEnabled: true,
+          dockOptions: {
+            buttonEnabled: false,
+            breakpoint: false
+          }
+        }
+      });
+
+      view.when(()=>{
+        const featureSet = new FeatureSet();
+
+        const params = {
+          in_json_file: "a.json",
+          out_features: featureSet
+        };
+
+        geoprocessor.execute(gpUrl, params);
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+  <div id="paneDiv" class="esri-widget">
+    Click on map to execute ViewShed geoprocessor
+  </div>
+</body>
+
+</html>

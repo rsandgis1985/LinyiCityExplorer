@@ -1,0 +1,292 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.esri-popup--is-docked-top-right .esri-popup__main-container {
+  max-height: 100%;
+}
+
+#appContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+#viewDiv {
+  flex: 1;
+  width: 100%;
+}
+
+/* #viewDiv {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+} */
+
+.container1 {
+  background-color: white;
+  color: #323232;
+  margin: 10px;
+  padding: 5px;
+  border-bottom: 1px solid rgba(50, 50, 50, 0.25);
+}
+
+.container2 {
+  display: flex;
+  flex: 1;
+  width: 100%;
+}
+
+.labelText {
+  padding-left: 5px;
+  font-size: 15px;
+}
+
+/* #mainDiv {
+  padding: 8px;
+} */
+
+button {
+  display: block;
+  margin: 0 auto;
+  margin-top: 1em;
+}
+
+#menu {
+  padding: 1em;
+  text-align: center;
+}
+
+#panel1,
+#panel2,
+#panel3,
+#mainDiv,
+#menu2,
+#paneDiv,
+#trackJson {
+  background-color: #f5f5f5;
+  width: 250px;
+  font-size: 12px;
+}
+
+.title {
+  font-weight: bold;
+  color: #0079c1;
+}
+
+.event,
+.property {
+  transition: background-color 0.5s ease-out;
+  padding-bottom: 2px;
+  opacity: 0.2;
+}
+
+.active {
+  opacity: 1;
+  background-color: #99ccff;
+}
+
+.inactive {
+  opacity: 1;
+  background-color: white;
+}
+
+/* #menu2 {
+  padding: 1em;
+} */
+
+#waveSlider {
+  height: 50px;
+  margin-top: 2em;
+}
+
+.color-btn {
+  border: 1px solid rgb(173, 172, 172);
+  width: 40px;
+  height: 20px;
+  cursor: pointer;
+}
+
+#navy {
+  background-color: #25427c;
+}
+
+#green {
+  background-color: #039962;
+}
+
+#turqoise {
+  background-color: #a2f9f5;
+}
+
+#topbar {
+  background: #fff;
+  padding: 10px;
+}
+
+.action-button {
+  font-size: 16px;
+  background-color: transparent;
+  border: 1px solid #d3d3d3;
+  color: #6e6e6e;
+  height: 32px;
+  width: 32px;
+  text-align: center;
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+.action-button:hover,
+.action-button:focus {
+  background: #0079c1;
+  color: #e4e4e4;
+}
+
+.active {
+  background: #0079c1;
+  color: #e4e4e4;
+}
+
+/* #paneDiv {
+  padding: 10px;
+  max-width: 200px;
+  background-color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1em;
+} */
+
+#credits {
+  font-size: 0.7em;
+  line-height: 1.1em;
+}
+
+#sketchPanel {
+  width: 200px;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.esri-button {
+  margin: 2px;
+}
+
+#configurationDiv {
+  padding: 10px;
+  text-align: left;
+  width: 250px;
+}
+
+#configurationInfoDiv {
+  padding: 7px;
+  text-align: left;
+}
+
+#snappingctrlkey {
+  display: inline;
+}
+
+#actionbuttons,
+#edgeoperationbuttons {
+  display: none;
+}
+
+.update-options {
+  display: flex;
+  flex-direction: row;
+}
+
+.edge-button,
+.shape-button {
+  flex: 1;
+  border-style: solid;
+  border-width: 1px;
+  border-image: none;
+}
+
+.edge-button-selected,
+.shape-button-selected {
+  background: #4c4c4c;
+  color: #fff;
+}
+
+#performanceInfo {
+  background-color: rgba(255, 255, 255, 0.9);
+  /* padding: 1em; */
+  background-color: #f5f5f5;
+  width: 550px;
+  font-size: 8px;
+}
+
+table {
+  margin: 1em 0;
+}
+
+.center {
+  text-align: center;
+}
+
+.esri-legend {
+  width: 200px !important;
+}
+
+calcite-input,
+calcite-switch {
+  margin: 5px;
+}
+
+#infoDiv1 {
+  max-height: calc(100vh - 100px);
+  height: 100%;
+}
+
+.btn-color-picker {
+  border: 1px solid var(--calcite-ui-border-1);
+  width: 30px;
+  height: 15px;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.div-color-picker {
+  margin: 5px;
+  font-size: 12px;
+}
+
+.colorPickerContainer {
+  position: absolute;
+  z-index: 9999;
+  top: 20px;
+  right: 280px;
+}
+
+.colorPickerContent {
+  background-color: var(--calcite-ui-foreground-1);
+  position: relative;
+  overflow: hidden;
+  padding: 3px;
+  margin: auto;
+}
+
+.colorHeader {
+  width: inherit;
+  color: var(--calcite-ui-text-2);
+  font-size: var(--calcite-font-size--1);
+  font-weight: var(--calcite-font-weight-medium);
+  padding: 3px 0;
+}
+
+.displaynone {
+  display: none;
+}
+
+#infoDiv2 {
+  max-height: calc(100vh - 100px);
+  height: 100%;
+}
+
+#newSliceContent {
+  margin-top: 10px;
+}

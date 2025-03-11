@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>
+      VoxelLayer Discrete Variable | Sample | ArcGIS Maps SDK for JavaScript
+      4.26
+    </title>
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+      .esri-legend {
+        width: 200px !important;
+      }
+      calcite-input, calcite-switch {
+        margin: 5px;
+      }
+      #infoDiv {
+        max-height: calc(100vh - 100px);
+        height: 100%;
+      }
+      .btn-color-picker {
+        border: 1px solid var(--calcite-ui-border-1);
+        width: 30px;
+        height: 15px;
+        cursor: pointer;
+        margin-left:5px;
+      }
+      .div-color-picker {
+        margin: 5px;
+        font-size: 12px;
+      }
+      .colorPickerContainer {
+        position: absolute;
+        z-index:9999;
+        top:20px;
+        right:280px;
+      }
+      .colorPickerContent {
+        background-color: var(--calcite-ui-foreground-1);
+        position:relative;
+        overflow:hidden;
+        padding:3px;
+        margin:auto;
+      }
+      .colorHeader {
+        width:inherit;
+        color: var(--calcite-ui-text-2);
+        font-size: var(--calcite-font-size--1);
+        font-weight: var(--calcite-font-weight-medium);
+        padding:3px 0;
+      }
+    </style>
+    <script
+      type="module"
+      src="https://js.arcgis.com/calcite-components/1.0.7/calcite.esm.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://js.arcgis.com/calcite-components/1.0.7/calcite.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.26/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.26"></script>
+    <script>
+      require([
+        "esri/views/SceneView",
+        "esri/WebScene",
+        "esri/layers/VoxelLayer",
+        "esri/layers/voxel/VoxelVariableStyle",
+        "esri/widgets/Expand",
+        "esri/widgets/Legend",
+        "esri/Color"
+      ], (
+        SceneView,
+        WebScene,
+        VoxelLayer,
+        VoxelVariableStyle,
+        Expand,
+        Legend,
+        Color
+      ) => {
+        const map = new WebScene({
+          portalItem: {
+            id: "6c5eeb4e22e748faa660f11f936ab851"
+          }
+        });
+        const view = new SceneView({
+          container: "viewDiv",
+          map: map,
+          qualityProfile: "high",
+          popup: {
+            defaultPopupTemplateEnabled: true
+          }
+        });
+        const legendExpand = new Expand({
+          view: view,
+          content: new Legend({
+            view: view
+          }),
+          expanded: true
+        });
+        view.ui.add(legendExpand, "bottom-left");
+        view.ui.add("infoDiv", "top-right");
+        map.when(function () {
+          const vxlLayer = map.allLayers.find(
+            (layer) => layer.type === "voxel"
+          );
+          view.whenLayerView(vxlLayer).then((layerView) => {
+            const infoDiv = document.getElementById("infoDiv");
+            const existingUniqueValuesList = document.getElementById(
+              "existingUniqueValuesList"
+            );
+            vxlLayer.renderMode = "volume";
+            let contItem = 0;
+            let uniqueValuesCount = 0;
+            let currentVariableStyle = null;
+            let selectedIndexColor = 0;
+            vxlLayer.currentVariableId = 0;
+            currentVariableStyle = vxlLayer.getVariableStyle(null);
+            const currentVariable = document.getElementById("currentVariable");
+            currentVariable.innerHTML = currentVariableStyle.label;
+            uniqueValuesCount = currentVariableStyle.uniqueValues.length;
+            /**
+             * Replace special characters that are reserverd characters in HTML.
+             **/
+            replaceSpecialCharacters = function (stringToChange) {
+              let escapedString = stringToChange
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+              return escapedString;
+            };
+            createUniqueValuesItem = function (uniqueValueIndex, uniqueValue) {
+              const itemList = document.createElement("calcite-list-item");
+              const itemInput = document.createElement("calcite-input");
+              const itemAction = document.createElement("calcite-action");
+              const divColor = document.createElement("div");
+              const btnColor = document.createElement("button");
+              const variableLabel = document.getElementById("variableLabel");
+              itemList.label = uniqueValue.label;
+              itemInput.scale = "s";
+              itemInput.prefixText = "Label";
+              itemInput.placeholder = "Label";
+              itemInput.value = uniqueValue.label;
+              itemInput.type = "text";
+              itemInput.id = "label_" + uniqueValueIndex.toString();
+              itemAction.icon = uniqueValue.enabled
+                ? "toggle-on"
+                : "toggle-off";
+              itemAction.slot = "actions-end";
+              itemAction.scale = "s";
+              itemAction.textEnabled = true;
+              itemAction.text = "Enabled";
+              btnColor.classList.add("btn-color-picker");
+              btnColor.id = "btnColor_" + uniqueValueIndex.toString();
+              btnColor.style.background = uniqueValue.color;
+              divColor.innerHTML = "Color:&nbsp;&nbsp;";
+              divColor.classList.add("div-color-picker");
+              existingUniqueValuesList.appendChild(itemList);
+              /**
+               * Updating the label of a unique value
+               **/
+              itemInput.addEventListener("calciteInputChange", function () {
+                uniqueValue.label = itemInput.value;
+                itemList.label = itemInput.value;
+                //A unique variable can have a label with special characters that are reserved characters in HTML.
+                //In order to display it properly in HTML, it is important to replace it with it's corresponding entity name.
+                let escapedLabel = replaceSpecialCharacters(uniqueValue.label);
+                variableLabel.innerHTML = escapedLabel;
+              });
+              itemAction.onclick = function () {
+                //Whether or not to render the unique value.
+                uniqueValue.enabled = uniqueValue.enabled ? false : true;
+                itemAction.icon = uniqueValue.enabled
+                  ? "toggle-on"
+                  : "toggle-off";
+              };
+              itemList.appendChild(itemAction);
+              itemList.appendChild(itemInput);
+              itemList.appendChild(divColor);
+              divColor.appendChild(btnColor);
+              /**
+               * Updating the color of a unique value by clicking on the color box
+               **/
+              btnColor.onclick = function () {
+                let escapedLabel = replaceSpecialCharacters(uniqueValue.label);
+                const colorPickerContainer = document.getElementById(
+                  "colorPickerContainer"
+                );
+                const colorPicker = document.getElementById("colorPicker");
+                variableLabel.innerHTML = escapedLabel;
+                colorPickerContainer.style.display =
+                  colorPickerContainer.style.display === "none"
+                    ? "block"
+                    : colorPickerContainer.style.display;
+                colorPicker.value = uniqueValue.color.toHex();
+                selectedIndexColor = uniqueValueIndex;
+              };
+            };
+            resetUniqueValues = function () {
+              while (existingUniqueValuesList.hasChildNodes()) {
+                existingUniqueValuesList.removeChild(
+                  existingUniqueValuesList.firstChild
+                );
+              }
+              colorPickerContainer.style.display = "none";
+              for (let i = 0; i < uniqueValuesCount; i++) {
+                createUniqueValuesItem(
+                  i,
+                  currentVariableStyle.uniqueValues.getItemAt(i)
+                );
+              }
+            };
+            resetUniqueValues();
+            colorPicker.addEventListener(
+              "calciteColorPickerChange",
+              function (e) {
+                const uniqueValue =
+                  currentVariableStyle.uniqueValues.getItemAt(
+                    selectedIndexColor
+                  );
+                const btnColor = document.getElementById(
+                  "btnColor_" + selectedIndexColor.toString()
+                );
+                btnColor.style.background = colorPicker.value;
+                uniqueValue.color = colorPicker.value;
+              }
+            );
+            closeButton.onclick = function () {
+              colorPickerContainer.style.display = "none";
+            };
+          });
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+    <calcite-panel id="infoDiv">
+      <div id="content" style="padding: 10px; width:220px;">
+        <calcite-label scale="s"
+          >Current Variable:
+          <div id="currentVariable"></div>
+        </calcite-label>
+        <calcite-list id="existingUniqueValuesList"> </calcite-list><br />
+      </div>
+    </calcite-panel>
+    <div
+      id="colorPickerContainer"
+      class="colorPickerContainer"
+      style="display:none"
+    >
+      <div class="colorPickerContent">
+        <div class="colorHeader">
+          <div
+            style="width:130px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;"
+          >
+            <span id="variableLabel"></span>
+          </div>
+          <div style="position:absolute;right:0;top:1px;">
+            <calcite-button
+              id="closeButton"
+              scale="s"
+              appearance="outline"
+              color="neutral"
+            >
+              <calcite-icon icon="x" scale="s"></calcite-icon>
+            </calcite-button>
+          </div>
+        </div>
+        <calcite-color-picker
+          id="colorPicker"
+          allow-empty
+          hide-channels
+          hide-saved
+          scale="s"
+        ></calcite-color-picker>
+      </div>
+    </div>
+  </body>
+</html>

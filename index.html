@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>临沂市地上地下一体化三维场景</title>
+    <script type="module" src="https://js.arcgis.com/calcite-components/1.0.7/calcite.esm.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.7/calcite.css" />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" />
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="shortcut icon" href="img/title.png" type="image/x-icon" />
+    <!-- Load AMD modules: the application itself and D3  -->
+    <script>
+        var locationPath = location.pathname.replace(/\/[^\/]+$/, "");
+        var dojoConfig = {
+            packages: [
+                {
+                    name: "lib",
+                    location: locationPath + "/lib"
+                    //main: "lib"
+                },
+                {
+                    name: "app",
+                    location: locationPath + "/app"
+                },
+                {
+                    name: "data",
+                    location: locationPath + "/data"
+                }
+            ],
+            async: true
+        };
+    </script>
+
+    <script src="https://js.arcgis.com/4.26/"></script>
+
+    <script>
+        require(["app/Application"], (Application) => {
+            // initialize application
+            var app = new Application();
+            app.init({ view: "viewDiv", events: "events", properties: "properties" });
+        });
+
+    </script>
+</head>
+
+<body>
+    <div id="appContainer">
+        <div id="viewDiv"></div>
+        <div id="panel1" class="esri-widget">
+            <div id="events" class="container1">
+                <a class="title"
+                    href="https://developers.arcgis.com/javascript/latest/api-reference/esri-views-View.html#events-summary"
+                    target="_blank">事件监控:</a>
+            </div>
+            <div id="properties" class="container1">
+                <a class="title"
+                    href="https://developers.arcgis.com/javascript/latest/api-reference/esri-views-View.html#properties-summary"
+                    target="_blank">属性监控:</a>
+            </div>
+        </div>
+        <div id="panel2" class="esri-widget">
+            <div id="colorMixMode" class="esri-widget">
+                <input type="radio" id="original" name="mode" checked />
+                <label for="original">原始纹理</label> <br />
+                <input type="radio" id="select" name="mode" />
+                <label for="select">简化纹理</label> <br />
+                <input type="radio" id="emphasize" name="mode" />
+                <label for="emphasize">增强型简化纹理</label> <br />
+                <input type="radio" id="desaturate" name="mode" />
+                <label for="desaturate">淡化纹理</label> <br />
+                <input type="radio" id="replace" name="mode" />
+                <label for="replace">移除纹理</label>
+            </div>
+        </div>
+        <div id="panel3" class="esri-widget">
+            <div id="controls" class="esri-widget">
+                <input type="radio" id="solidEdges" name="edges" checked />
+                <label for="solidEdges">实体边缘</label>
+                <input type="radio" id="sketchEdges" name="edges" />
+                <label for="sketchEdges">草图边缘</label>
+                <input type="radio" id="noEdges" name="edges" /><label for="noEdges">无边缘</label>
+            </div>
+        </div>
+        <div id="menu" class="esri-widget">
+            <input type="checkbox" id="opacityInput" />
+            <label for="opacityInput">地下可见性</label>
+            <button id="undergroundBtn">进入地下</button>
+            <input type="checkbox" id="color" />
+            <label for="color">显示全部物件</label>
+            <div id="sliceContainer"></div>
+            <div id="sliceOptions">
+                <button class="esri-button esri-button--secondary" id="resetPlaneBtn" type="button"
+                    title="Reset slice plane">
+                    重置剖面工具
+                </button>
+                <button class="esri-button esri-button--secondary" id="clearPlaneBtn" type="button" title="Clear slice">
+                    清除剖面工具
+                </button>
+                <input type="checkbox" id="tiltEnabled" checked />
+                <label for="tiltEnabled">允许剖面倾斜</label>
+            </div>
+        </div>
+        <div id="tableContainer" class="container2">
+            <div id="tableDiv"></div>
+        </div>
+        <div id="mainDiv" class="esri-widget">
+            <input id="checkboxId" type="checkbox" />
+            <label class="labelText" id="labelText">显示属性表</label>
+        </div>
+        <div id="menu2" class="esri-widget">
+            <h4>波浪方向</h4>
+            <div id="waveSlider"></div>
+            <h4>波浪强度</h4>
+            <input type="radio" name="waveStrengthRadio" value="calm" id="calm" /><label for="calm">平静的</label><br />
+            <input type="radio" name="waveStrengthRadio" value="rippled" id="rippled" /><label
+                for="rippled">少许的</label><br />
+            <input type="radio" name="waveStrengthRadio" value="slight" id="slight" /><label
+                for="slight">轻微的</label><br />
+            <input type="radio" name="waveStrengthRadio" value="moderate" id="moderate" checked /><label
+                for="moderate">中等的</label><br />
+            <h4>水域颜色</h4>
+            <button id="navy" class="color-btn"></button>
+            <button id="green" class="color-btn"></button>
+            <button id="turqoise" class="color-btn"></button>
+            <br />
+            <input type="checkbox" id="reflection" checked /><label for="reflection">水面反射</label>
+        </div>
+        <div id="topbar">
+            <button class="action-button esri-icon-measure-line" id="distanceButton" type="button"
+                title="测量两点之间距离"></button>
+            <button class="action-button esri-icon-measure-area" id="areaButton" type="button" title="测量面积"></button>
+        </div>
+        <div id="paneDiv" class="esri-widget">
+            <p>Select a symbol and place it in the scene:</p>
+            <button id="tent" class="esri-button">Tent</button><br />
+            <button id="canoe" class="esri-button">Canoe</button>
+            <p id="credits">
+                glTF模型来自
+                <a href="https://www.kenney.nl/assets/" target="_blank">Kenney game assets</a>
+                under
+                <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank">CC0 1.0 Universal</a>.
+            </p>
+        </div>
+        <div id="sketchPanel" class="esri-widget">
+            <div id="startbuttons">
+                <button id="point" data-type="point" class="esri-button starttool">
+                    绘制兴趣点
+                </button>
+                <button id="line" data-type="polyline" class="esri-button starttool">
+                    绘制路径
+                </button>
+                <button id="extrudedPolygon" data-type="polygon" class="esri-button starttool">
+                    绘制立方体
+                </button>
+            </div>
+            <div id="actionbuttons">
+                <button id="cancel" class="esri-button">Cancel</button>
+                <button id="done" class="esri-button">Done</button>
+            </div>
+            <div id="edgeoperationbuttons">
+                <br />Select the edge operation:
+                <div class="update-options" id="edge">
+                    <button class="esri-widget--button edge-button" id="none-edge-button" value="none">
+                        None
+                    </button>
+                    <button class="esri-widget--button edge-button edge-button-selected" id="split-edge-button"
+                        value="split">
+                        Split
+                    </button>
+                    <button class="esri-widget--button edge-button" id="offset-edge-button" value="offset">
+                        Offset
+                    </button>
+                </div>
+                Select the move operation:
+                <div class="update-options" id="shape">
+                    <button class="esri-widget--button shape-button" id="none-shape-button" value="none">
+                        None
+                    </button>
+                    <button class="esri-widget--button shape-button shape-button-selected" id="move-shape-button"
+                        value="move">
+                        Move
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="configurationDiv" class="esri-widget">
+            <table id="configurationTable">
+                <tbody>
+                    <tr>
+                        <td>
+                            <label><b>Tooltip/Label </b></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="tooltipOptionscheckbox" id="tooltipOptionscheckboxlabel">
+                                - Tooltip</label>
+                        </td>
+                        <td><input type="checkbox" id="tooltipOptionsheckbox" /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="labelOptionscheckbox" id="labelOptionscheckboxlabel">
+                                - Label</label>
+                        </td>
+                        <td><input type="checkbox" id="labelOptionscheckbox" /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="enabledcheckbox" id="enabledcheckboxlabel"><b>Snapping enabled (
+                                    <div id="snappingctrlkey">CTRL-key</div>
+                                    )
+                                </b></label>
+                        </td>
+                        <td><input type="checkbox" id="enabledcheckbox" checked /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="selfsnappingcheckbox" id="selfsnappingcheckboxlabel">
+                                - self snapping</label>
+                        </td>
+                        <td><input type="checkbox" id="selfsnappingcheckbox" /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="featuresnappingcheckbox" id="featuresnappingcheckboxlabel">
+                                - feature snapping</label>
+                        </td>
+                        <td><input type="checkbox" id="featuresnappingcheckbox" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="configurationInfoDiv" class="esri-widget">
+            <b>打开草图绘制设置 <span>&#8594;</span></b>
+        </div>
+        <div id="performanceInfo" overflow="auto">
+            <h3 id="title"></h3>
+            <table>
+                <tr align="top-left">
+                    <td>
+                        <table id="memory" border="1px"></table>
+                    </td>
+                    <td>
+                        <table id="count" border="1px"></table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="trackJsonDiv" class="esri-widget"><input id="viewFiles" type="file" /><br />
+            <label>镜头距离：</label>
+            <input id="scaleValueInput" type="scaleValue" name="num" value="2500" step="1" min="0" max="5000"
+                style="width: 50px;" />
+            <label>姿态角度：</label>
+            <input id="tiltValueInput" type="tiltValue" name="num" value="90" step="1" min="0" max="180"
+                style="width: 50px;" />
+            <label>时间间隔：</label>
+            <input id="timeValueInput" type="text" value="5000" style="width: 50px;" />
+            <br />
+            <textarea id="textbox" cols="55" rows="20"></textarea>
+        </div>
+        <calcite-panel id="infoDiv1">
+            <div id="content1" style="padding: 10px; width:220px;">
+                <calcite-label scale="s">当前变量:
+                    <div id="currentVariable"></div>
+                </calcite-label>
+                <calcite-list id="existingUniqueValuesList"> </calcite-list><br />
+            </div>
+        </calcite-panel>
+        <div id="colorPickerContainer" class="colorPickerContainer" style="display:none">
+            <div class="colorPickerContent">
+                <div class="colorHeader">
+                    <div style="width:130px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">
+                        <span id="variableLabel"></span>
+                    </div>
+                    <div style="position:absolute;right:0;top:1px;">
+                        <calcite-button id="closeButton" scale="s" appearance="outline" color="neutral">
+                            <calcite-icon icon="x" scale="s"></calcite-icon>
+                        </calcite-button>
+                    </div>
+                </div>
+                <calcite-color-picker id="colorPicker" allow-empty hide-channels hide-saved
+                    scale="s"></calcite-color-picker>
+            </div>
+        </div>
+        <calcite-panel id="infoDiv2">
+            <div id="content2" style="padding: 10px; width:265px;">
+                <calcite-label scale="s">
+                    剖切位置 (东西向,X):
+                    <calcite-slider id="sliceXAxisSlider" scale="s" min="0" step="1" snap
+                        label-handles></calcite-slider>
+                </calcite-label>
+                <calcite-label scale="s">
+                    剖切位置 (南北向,Y):
+                    <calcite-slider id="sliceYAxisSlider" scale="s" min="0" step="1" snap
+                        label-handles></calcite-slider>
+                </calcite-label>
+                <calcite-label scale="s">
+                    剖切位置 (向下向,Z):
+                    <calcite-slider id="sliceZAxisSlider" scale="s" min="0" step="1" snap
+                        label-handles></calcite-slider>
+                </calcite-label>
+                <calcite-button icon-start="plus-circle" label="Slice" id="customSliceButton"
+                    scale="s">添加剖切</calcite-button>
+                <div id="newSliceContent" class="displaynone">
+                    <div id="volumeValues" style="margin-bottom:10px;font-weight: bold;"></div>
+                    <calcite-input id="newSliceXAxisInput" scale="s" prefix-text="X轴" placeholder="Point X" value="0"
+                        min="0" type="number"></calcite-input><br />
+                    <calcite-input id="newSliceYAxisInput" scale="s" prefix-text="Y轴" placeholder="Point Y" value="0"
+                        min="0" type="number"></calcite-input><br />
+                    <calcite-input id="newSliceZAxisInput" scale="s" prefix-text="Z轴" placeholder="Point Z" value="0"
+                        min="0" type="number"></calcite-input><br />
+                    <calcite-input id="newOrientationInput" scale="s" prefix-text="方向" placeholder="Orientation"
+                        value="270" min="0" max="360" type="number"></calcite-input><br />
+                    <calcite-input id="newTiltInput" scale="s" prefix-text="倾角" placeholder="Tilt" value="90" min="0"
+                        max="180" type="number"></calcite-input>
+                </div>
+            </div>
+        </calcite-panel>
+        <div id="viewingModeId" class="viewingModeClass"> <input
+                class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="switch-btn"
+                value="本地" /></div>
+        <div id="groundConfigDiv" class="esri-widget">
+            <input id="checkboxId2" type="checkbox" checked="checked"/>
+            <label class="labelText2" id="labelText2">全球高程</label>
+            <input id="checkboxId3" type="checkbox" />
+            <label class="labelText3" id="labelText3">本地高程</label>
+        </div>
+    </div>
+</body>
+
+</html>

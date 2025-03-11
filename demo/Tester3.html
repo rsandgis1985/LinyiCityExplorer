@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>从本地读取文件内容并进行展示</title>
+</head>
+
+<body>
+    <div><input id="viewFiles" type="file" /></div>
+    <video id="video1" autoplay="autoplay" controls="controls"
+        style="margin-top:15px;"></video>
+    <audio id="audio" autoplay="autoplay" controls="controls"></audio>
+    <img id="viewImg" style="max-width:500px" />
+    <textarea id ="textbox" cols="25" rows="5"></textarea>
+    <script type-"text/ javascript">
+        var reg = /(.csv|.txt)$/m;
+        var reg2 = /(.mp4)$/m;
+        var reg3 = /(.jp[e]?g|.png)$/m;
+        var reg4 = /(.mp3)$/m;
+        var viewFiles = document.getElementById("viewFiles");
+        var videoView = document.getElementById("video1");
+        var imageView = document.getElementById("viewImg");
+        var audioView = document.getElementById("audio");
+        var textView = document.getElementById("textbox");
+        function viewFile(file) {
+            var reader = new FileReader();
+            console.log(file.name);
+            if (reg.test(file.name)) {
+                reader.readAsText(file, 'utf8')
+            };
+            if (reg2.test(file.name) || reg3.test(file.name) || reg4.test(file.name)) {
+                reader.readAsDataURL(file)
+            };
+            reader.onload = function (evt) {
+                if (reg.test(file.name)) {
+                    //document.body.innerHTML += evt.target.result; // reader.result为获取结果
+                    textView.innerHTML += evt.target.result;
+                    d1=JSON.parse(textView.innerHTML);
+                    console.log(d1["features"]);
+                }
+                if (reg2.test(file.name)) {
+                    videoView.src = evt.target.result;
+                    alert(videoView.videoWidth);
+                    videoView.play();
+                    videoView.loop = "loop";
+                }
+                if (reg3.test(file.name)) {
+                    imageView.src = evt.target.result;
+                }
+                if (reg4.test(file.name)) {
+                    document.getElementById('audio').src = evt.target.result
+                    console.log(event.target.result)
+                }
+            }
+        }
+        viewFiles.addEventListener("change", function () {
+            viewFile(this.files[0]);
+        }, false);
+    </script>
+</body>
+
+</html>

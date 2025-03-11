@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>
+    Track widget simulation | Sample | ArcGIS Maps SDK for JavaScript 4.26
+  </title>
+
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+    }
+  </style>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" />
+
+  <script>
+    var dojoConfig = {
+      packages: [
+        {
+          name: "geolocate",
+          location: "//2gis.github.io/mock-geolocation/dist",
+          main: "geolocate"
+        }
+      ]
+    };
+  </script>
+
+  <script src="https://js.arcgis.com/4.26/"></script>
+
+  <script>
+    require([
+      "geolocate", // geolocation simulator (https://github.com/2gis/mock-geolocation)
+      "esri/widgets/Track",
+      "esri/WebScene",
+      "esri/views/SceneView",
+      "esri/Map"
+    ], (geolocate, Track, WebScene, SceneView, Map) => {
+      // geolocation simulator
+      stubGeolocation();
+
+      const map = new WebScene({
+        basemap: "topo-vector"
+      });
+
+      const view = new SceneView({
+        map: map,
+        container: "viewDiv",
+        //center: [118.27, 35.01],
+        camera: {
+          position: [118.32, 35.08, 30110],
+          tilt: 0,
+          heading: 0
+        },
+        zoom: 18,
+        ui: {
+          components: ["attribution"] // replace default set of UI components
+        }
+      });
+      map.ground.navigationConstraint = {
+        type: "none"
+      };
+      const track = new Track({
+        view: view,
+        goToLocationEnabled: false // disable this since we want to control what happens after our location is acquired
+      });
+      view.ui.add(track, "top-left");
+
+      view.when(() => {
+        let prevLocation = view.center;
+
+        track.on("track", () => {
+          const location = track.graphic.geometry;
+
+          view
+            .goTo(
+              {
+                target: location,
+                tilt: 90,
+                scale: 3500,
+                heading: 360 - getHeading(location, prevLocation), // only applies to SceneView
+                rotation: 360 - getHeading(location, prevLocation) // only applies to MapView
+              }
+              // camera = {
+              //   position: location,
+              //   tilt: 0,
+              //   heading: 0
+              // }
+            )
+            .catch((error) => {
+              if (error.name != "AbortError") {
+                console.error(error);
+              }
+            });
+
+          prevLocation = location.clone();
+        });
+
+        track.start();
+      });
+
+      function getHeading(point, oldPoint) {
+        // get angle between two points
+        const angleInDegrees =
+          (Math.atan2(point.y - oldPoint.y, point.x - oldPoint.x) * 180) /
+          Math.PI;
+
+        // move heading north
+        return -90 + angleInDegrees;
+      }
+
+      // geolocation simulator
+      function stubGeolocation() {
+        let coords = [
+          {
+            lat: 35.114219095000067,
+            lng: 118.27152087500008,
+            altitude: 0
+          },
+          {
+            lng: 118.27600953400008,
+            lat: 35.116131001000042,
+            altitude: 58.286999999996624
+          },
+          {
+            lng: 118.27644882900006,
+            lat: 35.116885609000065,
+            altitude: 58.87159999999858
+          },
+          {
+            lat: 35.117898860000082,
+            lng: 118.27798988300003,
+            altitude: 69.056500000006054
+          },
+          {
+            lng: 118.27848794400006,
+            lat: 35.118989928000076,
+            altitude: 10
+          },
+          {
+            lng: 118.27649155500001,
+            lat: 35.11988401800005,
+            altitude: 58.354099999996834
+          },
+          {
+            lng: 118.27620047000005,
+            lat: 35.120792354000059,
+            altitude: 58.00800000000163
+          },
+          {
+            lng: 118.26930544900006,
+            lat: 35.122170193000045,
+            altitude: -0.00010000000474974513
+          }
+        ],
+          currentCoordIndex = 0;
+
+        geolocate.use();
+
+        setInterval(() => {
+          geolocate.change(coords[currentCoordIndex]);
+          currentCoordIndex = (currentCoordIndex + 1) % coords.length;
+        }, 3500);
+      }
+    });
+  </script>
+  <script>
+    window.onload = function () {
+      var url = "data/demo.json"/*json文件url，本地的就写本地的位置，如果是服务器的就写服务器的路径*/
+      var request = new XMLHttpRequest();
+      request.open("get", url);/*设置请求方法与路径*/
+      request.send(null);/*不发送数据到服务器*/
+      request.onload = function () {/*XHR对象获取到返回信息后执行*/
+        if (request.status == 200) {/*返回状态为200，即为数据获取成功*/
+          var json = JSON.parse(request.responseText);
+          for (var i = 0; i < json.length; i++) {
+            console.log(json[i].name);
+          }
+          console.log(json);
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+
+</html>

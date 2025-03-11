@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>
+    Track current location | Sample | ArcGIS Maps SDK for JavaScript 4.26
+  </title>
+
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css" />
+  <script>
+    var dojoConfig = {
+      packages: [
+        {
+          name: "geolocate",
+          location: "//lib/2gis.github.io/mock-geolocation/dist",
+          main: "geolocate"
+        }
+      ]
+    };
+  </script>
+  <script src="https://js.arcgis.com/4.26/"></script>
+
+  <script>
+    require([
+      "geolocate", // geolocation simulator (https://github.com/2gis/mock-geolocation)
+      "esri/widgets/Track",
+      "esri/views/MapView",
+      "esri/Map",
+      "esri/views/SceneView",
+      "esri/WebScene",
+      "esri/layers/SceneLayer",
+      "esri/config"], (
+        geolocate,
+        Track,
+        MapView,
+        Map,
+        SceneView,
+        WebScene,
+        SceneLayer,
+        esriConfig
+      ) => {
+      //设定空间数据门户
+      esriConfig.portalUrl = "https://lyupc.org.cn/arcgis";
+      //创建场景对象
+      const LinyiScene = new WebScene({
+        basemap: "dark-gray-vector",
+        ground: "world-elevation"
+      });
+      //创建场景视图
+      const view = new SceneView({
+        container: "viewDiv",
+        map: LinyiScene,
+        camera: {
+          position: [118.32, 35.08, 30110],
+          tilt: 0,
+          heading: 0
+        },
+        qualityProfile: "high",
+        highlightOptions: {
+          haloOpacity: 0
+        },
+        popup: {
+          dockEnabled: true,
+          dockOptions: {
+            buttonEnabled: false,
+            breakpoint: false
+          }
+        }
+      });
+      const Building3DLayer = new SceneLayer({
+        portalItem: {
+          id: "e4d6756de6444079b2c8e38fa8214d91"
+        },
+        title: "【多面体建筑物】临沂市城区",
+        popupEnabled: true
+      });
+      LinyiScene.add(Building3DLayer);
+      // Create an instance of the Track widget
+      // and add it to the view's UI
+      const track = new Track({
+        view: view,
+        // disable this since we want to control what happens after our location is acquired
+        goToLocationEnabled: flase
+      });
+      view.ui.add(track, "top-left");
+      // geolocation simulator
+      stubGeolocation();
+      // The sample will start tracking your location
+      // once the view becomes ready
+      view.when(() => {
+        let prevLocation = view.center;
+
+        track.on("track", () => {
+          const location = track.graphic.geometry;
+
+          view
+            .goTo({
+              center: location,
+              tilt: 50,
+              scale: 2500,
+              heading: 360 - getHeading(location, prevLocation), // only applies to SceneView
+              rotation: 360 - getHeading(location, prevLocation) // only applies to MapView
+            })
+            .catch((error) => {
+              if (error.name != "AbortError") {
+                console.error(error);
+              }
+            });
+
+          prevLocation = location.clone();
+        });
+        track.start();
+      });
+      function getHeading(point, oldPoint) {
+        // get angle between two points
+        const angleInDegrees =
+          (Math.atan2(point.y - oldPoint.y, point.x - oldPoint.x) * 180) /
+          Math.PI;
+
+        // move heading north
+        return -90 + angleInDegrees;
+      };
+      // geolocation simulator
+      function stubGeolocation() {
+        let coords = [
+          {
+            lat: 35.05648363780692,
+            lng: 118.19565501782613
+          },
+          {
+            lng: 118.19565880345007,
+            lat: 35.05682230352545
+          },
+          {
+            lng: 118.19566258907402,
+            lat: 35.05716096924398
+          },
+          {
+            lng: 118.19566637469796,
+            lat: 35.05749963496251
+          },
+          {
+            lng: 118.19567016032191,
+            lat: 35.05783830068104
+          },
+          {
+            lng: 118.19567394594586,
+            lat: 35.05817696639957
+          },
+          {
+            lng: 118.1956777315698,
+            lat: 35.0585156321181
+          },
+          {
+            lng: 118.19568151719375,
+            lat: 35.05885429783663
+          },
+          {
+            lng: 118.1956853028177,
+            lat: 35.05919296355516
+          },
+          {
+            lat: 35.059192963555134,
+            lng: 118.19568530281771
+          },
+          {
+            lat: 35.05920092649827,
+            lng: 118.19575894615099
+          },
+          {
+            lng: 118.19575574232981,
+            lat: 35.058861053180614
+          },
+          {
+            lng: 118.19575253850863,
+            lat: 35.05852117986296
+          },
+          {
+            lng: 118.19574933468745,
+            lat: 35.0581813065453
+          },
+          {
+            lng: 118.19574613086627,
+            lat: 35.057841433227644
+          },
+          {
+            lng: 118.19574292704509,
+            lat: 35.05750155990999
+          },
+          {
+            lng: 118.19573972322391,
+            lat: 35.05716168659233
+          },
+          {
+            lng: 118.19573651940273,
+            lat: 35.056821813274674
+          },
+          {
+            lng: 118.19573331558155,
+            lat: 35.05648193995702
+          },
+          {
+            lat: 35.05648193995701,
+            lng: 118.19573331558153
+          },
+          {
+            lng: 118.19569416670383,
+            lat: 35.056482788881965
+          },
+          {
+            lng: 118.19565501782613,
+            lat: 35.05648363780692
+          }
+        ],
+          currentCoordIndex = 0;
+
+        geolocate.use();
+
+        setInterval(() => {
+          geolocate.change(coords[currentCoordIndex]);
+          currentCoordIndex = (currentCoordIndex + 1) % coords.length;
+        }, 1500);
+      };
+    });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+
+</html>
